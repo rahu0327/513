@@ -1,0 +1,156 @@
+MAP
+  imagetype png
+  NAME "Sri Lanka Map"
+  SIZE 800 600
+  UNITS METERS
+  EXTENT 79.5 5.5 81.5 10.0
+  IMAGECOLOR 255 255 255
+  shapepath "../data"
+  FONTSET "../fonts/fonts.txt"
+  SYMBOLSET "../symbols/symbols.txt"
+
+  # Web metadata
+  WEB
+    METADATA
+      "wms_title"           "Sri Lanka Road Map"
+      "wms_abstract"        "Sri Lanka of select district"
+
+    END
+  END
+
+ # Projection information
+ PROJECTION
+    "init=epsg:4326"		# final projection of the entire map
+  END
+
+#district layer
+  LAYER
+    NAME "districts_layer"
+    TYPE POLYGON
+    DATA "districts.shp"
+    STATUS ON
+    PROCESSING "NATIVE_SQL 'SELECT * FROM districts WHERE district_name = ''DISTRCT_NAME'''"
+    CLASS
+      STYLE
+        COLOR 200 200 200
+        OUTLINECOLOR 0 0 0
+      END
+    END
+  END
+
+#road layer
+  LAYER
+    NAME "roads_layer"
+    TYPE LINE
+    DATA "roads.shp"
+    STATUS ON
+      PROCESSING "NATIVE_SQL 'SELECT * FROM roads WHERE ST_INTERSECTS(geom, (SELECT geom FROM districts WHERE district_name = ''DISTRICT_NAME''))'"
+
+    CLASSITEM "road_type"
+  CLASS
+    Name 	'Highway'
+    EXPRESSION 'Highway'
+    STYLE
+      COLOR 255 0 0
+      WIDTH 2
+    END
+  END
+  CLASS
+    Name	' Main road'
+    EXPRESSION 'Main Road'
+    STYLE
+      COLOR 0 0 0
+      WIDTH 2
+    END
+  END
+CLASS
+    Name	' secondary road'
+    EXPRESSION 'secondary Road'
+    STYLE
+      COLOR 250 250 10
+      WIDTH 1
+    END
+  END
+  CLASS
+    EXPRESSION 'Local Road'
+    STYLE
+      COLOR 250 70 5
+      WIDTH 1
+    END
+  END
+
+#city layer
+  LAYER
+    NAME "cities_layer"
+    TYPE POINT
+    DATA "cities.shp"
+    STATUS ON
+    LABELITEM "city_name"
+    PROCESSING "NATIVE_SQL 'SELECT * FROM cities WHERE ST_INTERSECTS(geom, (SELECT geom FROM districts WHERE district_name = ''DISTRICT_NAME''))'"
+
+    CLASS
+      STYLE
+        SYMBOL "circle"
+        SIZE 10
+        COLOR 255 0 0
+      END
+      LABEL
+        TYPE TRUETYPE
+        FONT "times"
+        SIZE 8
+        COLOR 0 0 0
+        TEXT "[city_name]"
+      END
+    END
+  END
+# forest of sri lanka
+ LAYER
+    NAME "forest_layer"
+    TYPE POLYGON
+    DATA "forest.shp"
+    STATUS ON
+    PROCESSING "NATIVE_SQL 'SELECT * FROM forest WHERE ST_INTERSECTS(geom, (SELECT geom FROM districts WHERE district_name = ''DISTRICT_NAME''))'"
+    CLASSITEM "name"
+    CLASS
+      STYLE
+        COLOR 5 170 20
+        OUTLINECOLOR 0 0 0
+      END
+      LABEL
+        TYPE TRUETYPE
+        FONT "arial"
+        SIZE 10
+        COLOR 0 0 0
+        TEXT "[name]"
+      END
+    END
+  END
+
+# Raster layer True-color composite image of SRI LANKA
+  LAYER
+    NAME "true_color"
+    TYPE RASTER
+    STATUS ON
+    DATA "true_color.tif"
+    PROCESSING "NATIVE_SQL 'SELECT * FROM true_color_ WHERE ST_INTERSECTS(geom, (SELECT geom FROM districts WHERE district_name = ''DISTRICT_NAME''))'"
+  END
+
+  # False-color raster layer false color composite image of sri lanka
+  LAYER
+    NAME "false_color"
+    TYPE RASTER
+    STATUS ON
+    DATA "false_color.tif"
+    PROCESSING "NATIVE_SQL 'SELECT * FROM false_color WHERE ST_INTERSECTS(geom, (SELECT geom FROM districts WHERE district_name = ''DISTRICT_NAME''))'"
+  END
+ # NDVI raster layer of sri lanka
+  LAYER
+    NAME "ndvi"
+    TYPE RASTER
+    STATUS ON
+    DATA "path/to/ndvi.tif"
+    PROCESSING "NATIVE_SQL 'SELECT * FROM ndvi_ WHERE ST_INTERSECTS(geom, (SELECT geom FROM districts WHERE district_name = ''DISTRICT_NAME''))'"
+  END
+
+
+END
